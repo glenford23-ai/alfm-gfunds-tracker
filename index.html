@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>ALFM GFunds Tracker</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">GF</div>
+      <div>
+        <div class="brand-title">ALFM GFunds Tracker</div>
+        <div class="brand-sub">Paste GCash GFunds updates → get records, charts, and analysis.</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btnInstall" class="btn btn-ghost" title="Install app">Install</button>
+      <button id="btnExport" class="btn btn-ghost" title="Export data">Export</button>
+      <button id="btnImport" class="btn btn-ghost" title="Import data">Import</button>
+      <input id="importFile" type="file" accept="application/json" hidden />
+      <button id="btnReset" class="btn btn-danger" title="Reset all data">Reset</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <div class="card hero">
+        <div class="hero-head">
+          <div>
+            <div class="h-title">Current Snapshot</div>
+            <div class="h-sub" id="currentAsOf">No data yet</div>
+          </div>
+          <div class="pill" id="fundNamePill">ALFM Global Multi-Asset Income Fund (PHP)</div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-label">Total Value</div>
+            <div class="kpi-value" id="kpiValue">₱ —</div>
+            <div class="kpi-foot" id="kpiValueDelta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Units</div>
+            <div class="kpi-value" id="kpiUnits">—</div>
+            <div class="kpi-foot" id="kpiUnitsDelta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">NAVPU</div>
+            <div class="kpi-value" id="kpiNav">₱ —</div>
+            <div class="kpi-foot" id="kpiNavDelta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">1-Yr Return</div>
+            <div class="kpi-value" id="kpi1y">—</div>
+            <div class="kpi-foot" id="kpi1yDelta">—</div>
+          </div>
+        </div>
+
+        <div class="insights">
+          <div class="ins-card">
+            <div class="ins-title">Cashflow Summary (Selected Range)</div>
+            <div class="ins-body" id="cashflowSummary">Add snapshots and events to see breakdown.</div>
+          </div>
+          <div class="ins-card">
+            <div class="ins-title">Latest Insight</div>
+            <div class="ins-body" id="latestInsight">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card input">
+        <div class="card-title">Paste GFunds Update</div>
+        <div class="card-sub">Copy from GCash GFunds and paste below. We’ll parse: Total Value, Units, NAVPU, 1-Yr Return, Pending Buy/Sell, and the “as of” date.</div>
+
+        <textarea id="pasteBox" class="textarea" placeholder="Paste your GCash GFunds text here..."></textarea>
+
+        <div class="row">
+          <button id="btnParseSave" class="btn btn-primary">Parse & Save Snapshot</button>
+          <button id="btnClearPaste" class="btn btn-ghost">Clear</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card-title">Add Event</div>
+        <div class="card-sub">Log deposits/top-ups and dividends (cash or reinvest). These are used for breakdown and insights.</div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="deposit">Deposit</button>
+          <button class="tab" data-tab="dividend">Dividend</button>
+        </div>
+
+        <div id="tabDeposit" class="tabpane show">
+          <div class="formgrid">
+            <label class="field">
+              <span>Date</span>
+              <input id="depDate" type="date" />
+            </label>
+            <label class="field">
+              <span>Amount (PHP)</span>
+              <input id="depAmt" inputmode="decimal" placeholder="1000.00" />
+            </label>
+            <label class="field span2">
+              <span>Note (optional)</span>
+              <input id="depNote" placeholder="e.g., GCash top-up" />
+            </label>
+          </div>
+          <button id="btnAddDeposit" class="btn btn-primary">Add Deposit</button>
+        </div>
+
+        <div id="tabDividend" class="tabpane">
+          <div class="formgrid">
+            <label class="field">
+              <span>Date</span>
+              <input id="divDate" type="date" />
+            </label>
+            <label class="field">
+              <span>Amount (PHP)</span>
+              <input id="divAmt" inputmode="decimal" placeholder="26.68" />
+            </label>
+            <label class="field">
+              <span>Type</span>
+              <select id="divType">
+                <option value="cash">Cash payout</option>
+                <option value="reinvest">Reinvest</option>
+              </select>
+            </label>
+            <label class="field span2">
+              <span>Reinvest NAVPU (optional)</span>
+              <input id="divNavOverride" inputmode="decimal" placeholder="Leave blank to use nearest snapshot NAVPU" />
+            </label>
+            <label class="field span2">
+              <span>Note (optional)</span>
+              <input id="divNote" placeholder="e.g., GFunds dividend" />
+            </label>
+          </div>
+          <button id="btnAddDividend" class="btn btn-primary">Add Dividend</button>
+        </div>
+
+        <div class="mini-note" id="parsePreview">Tip: the app uses the “as of” date inside your paste for the record date.</div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Charts</div>
+            <div class="card-sub">NAVPU, Total Value, and Units over time.</div>
+          </div>
+          <div class="range">
+            <label>Range</label>
+            <select id="rangeSelect">
+              <option value="all">All</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="365">Last 365 days</option>
+            </select>
+          </div>
+        </div>
+        <div class="charts">
+          <canvas id="chartNav" height="160"></canvas>
+          <canvas id="chartValue" height="160"></canvas>
+          <canvas id="chartUnits" height="160"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Timeline</div>
+            <div class="card-sub">Snapshots and events (deposits/dividends). Click an item to highlight it.</div>
+          </div>
+          <div class="row">
+            <button id="btnDeleteLast" class="btn btn-ghost">Delete Last Snapshot</button>
+          </div>
+        </div>
+        <div id="timeline" class="timeline"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Records Table</div>
+          <div class="card-sub">Sortable view of your saved snapshots.</div>
+        </div>
+        <div class="row">
+          <input id="searchBox" class="search" placeholder="Search notes / dates..." />
+          <button id="btnCSV" class="btn btn-ghost">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="recordsTable">
+          <thead>
+            <tr>
+              <th data-sort="date">As of</th>
+              <th data-sort="value">Total Value</th>
+              <th data-sort="units">Units</th>
+              <th data-sort="nav">NAVPU</th>
+              <th data-sort="oneYear">1-Yr</th>
+              <th>Pending Buy</th>
+              <th>Pending Sell</th>
+              <th>Auto Analysis</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Data is stored locally on your device (localStorage). Export regularly if you want backups.</div>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

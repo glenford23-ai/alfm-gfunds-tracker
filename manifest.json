@@ -1,0 +1,16 @@
+{
+  "name": "ALFM GFunds Tracker",
+  "short_name": "GFunds Tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#0b1220",
+  "description": "Paste GCash GFunds updates, track snapshots, deposits/dividends, and get breakdown + charts.",
+  "icons": [
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAklEQVR4AewaftIAAACPSURBVO3BQW7CMBQF0b3/0x2UQJqS0x0pHcQq0qQm1nQv8QJ8xgkAAAAAAAAAAAB4yq0Vxwq8yq7l1m0z9gYhV3bTgk0y9f5bOeQb6c1bq1b7m3mQZ3wq8KxkC9f3m4m1b9m2o7q3m5f0tAAAAAAAAAAAA8C8GmQd1b1m9bQAAAABJRU5ErkJggg==",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}
